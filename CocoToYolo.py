@@ -22,7 +22,7 @@ def find_ants_and_convert(ant_dict, image_id, width, height):
     return ants
 
 def get_original_info(root_path, ant_file_name):
-    ant_file_path = root_path + '\\Annotations\\' + ant_file_name
+    ant_file_path = root_path + os.path.sep + 'Annotations' + os.path.sep + ant_file_name
 
     # read Coco-format data
     with open(ant_file_path, 'r', encoding='utf-8') as f:
@@ -67,10 +67,10 @@ def split_data(original_list, split_rate):
 
 # copy datasets to this path
 def build_datasets(root_path, datasets_name, split_data_dict):
-    original_images_root_path = root_path + "Images\\"
+    original_images_root_path = root_path + os.path.sep + "Images" + os.path.sep
     for data_case, data_list in split_data_dict.items():
-        images_path = datasets_name + "\\" + data_case +"\\images\\"
-        labels_path = datasets_name + "\\" + data_case + "\\labels\\"
+        images_path = datasets_name + os.path.sep + data_case + os.path.sep + "images" + os.path.sep
+        labels_path = datasets_name + os.path.sep + data_case + os.path.sep + "labels" + os.path.sep
         os.makedirs(images_path, exist_ok=True)
         os.makedirs(labels_path, exist_ok=True)
         for image_data in data_list:
