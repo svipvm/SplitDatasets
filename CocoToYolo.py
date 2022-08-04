@@ -73,11 +73,19 @@ def build_datasets(root_path, datasets_name, split_data_dict):
         labels_path = datasets_name + os.path.sep + data_case + os.path.sep + "labels" + os.path.sep
         os.makedirs(images_path, exist_ok=True)
         os.makedirs(labels_path, exist_ok=True)
+        images_txt = images_path + data_case + '.txt'
+        if os.path.exists(images_txt):
+            with open(images_txt, 'w') as f:
+                f.write('')
         for image_data in data_list:
             original_image_path = original_images_root_path + image_data['filename']
             copy_image_path = images_path + image_data['filename']
             copy_label_path = labels_path + image_data['filename'].split('.')[0] + '.txt'
-            shutil.copyfile(original_image_path, copy_image_path)
+            # old function: copy image file
+            # shutil.copyfile(original_image_path, copy_image_path)
+            # new function: build txt about path
+            with open(images_txt, 'a') as f:
+                f.write(original_image_path + '\n')
             with open(copy_label_path, 'w') as f:
                 for annotation in image_data['annotations']:
                     f.write("%d %f %f %f %f\n" % (
