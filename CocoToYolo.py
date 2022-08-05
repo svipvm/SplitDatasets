@@ -103,7 +103,7 @@ def memu():
           "--h show help memu\n"
           "--source [dir] original images path\n"
           "--coco [file] Coco Annotation filename\n"
-          # "--dataset [dataset] the name of dataset\n"
+          "--k-fold [f-fold] the number of k-fold\n"
           "--split [name rate] the name and rate of split data")
 
 if __name__ == '__main__':
@@ -111,8 +111,8 @@ if __name__ == '__main__':
     if len(args) < 2:
         memu()
         exit(0)
-    arg_name = ['--source', '--coco', '--dataset', '--split']
-    root_path, ant_file_name, dataset, split_dict = None, None, None, {}
+    arg_name = ['--source', '--coco', '--k-fold', '--split']
+    root_path, ant_file_name, k_fold, split_dict = None, None, None, {}
     index = 1
     while index < len(args):
         if arg_name[0] in args[index]:
@@ -122,7 +122,7 @@ if __name__ == '__main__':
             ant_file_name = args[index + 1]
             index = index + 2
         elif arg_name[2] in args[index]:
-            dataset = args[index + 1]
+            k_fold = args[index + 1]
             index = index + 2
         elif arg_name[3] in args[index]:
             split_dict[args[index + 1]] = float(args[index + 2])
@@ -131,24 +131,42 @@ if __name__ == '__main__':
             memu()
             exit(0)
 
+    if (k_fold and bool(split_dict)) or (not k_fold and not bool(split_dict)):
+        print('input k-fold or split, please!')
+        exit(0)
+
     print('arguments information')
     print('    images root path:', root_path)
     # print('annotation file name:', ant_file_name)
-    print('        dataset name:', dataset)
-    print('          split info:', split_dict)
+    if k_fold:
+        k_fold = int(k_fold)
+        print('       k-fold number:', k_fold)
+    if split_dict:
+        print('          split info:', split_dict)
 
     # root_path = "D:\\datasets\\NippleDetection\\DatasetId\\"
     # ant_file_name = 'coco_info.json'
     original_list, image_count, categories = get_original_info(root_path, ant_file_name)
 
     # rate = [0.7, 0.2, 0.1] # train, valid, test
-    datasets = split_data(original_list, [value for key, value in split_dict.items()])
-    data_dict = {name: data for (name, value), data in zip(split_dict.items(), datasets)}
+    datasets, data_dict = None, None
+    if split_dict:
+        datasets = split_data(original_list, [value for key, value in split_dict.items()])
+        data_dict = {name: data for (name, value), data in zip(split_dict.items(), datasets)}
+    elif k_fold:
+        datasets = split_data(original_list, [1.0 / k_fold] * k_fold)
+        data_dict = {'data' + str(num): data for num, data in zip(range(k_fold), datasets)}
     # build_datasets(root_path, dataset, data_dict)
     build_datasets(root_path, data_dict)
 
     print('split data to success!')
-    print('total of splitting data:',
-          {name: len(data) for (name, _), data in zip(split_dict.items(), datasets)})
+    if split_dict:
+        print('total of splitting data:',
+            {name: len(data) for (name, _), data in zip(split_dict.items(), datasets)})
+    if k_fold:
+        print('total of splitting data:',
+              {'data' + str(num): len(data) for num, data in zip(range(k_fold), datasets)})
     print('        total of images:', image_count)
     print('             categories:', [category['name'] for category in categories])
+
+# --source D:\Datasets\NippleDetection\DatasetId --coco coco_info.json --k-fold 10 --split train 0.8 --split valid 0.2
