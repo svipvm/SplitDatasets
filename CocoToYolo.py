@@ -66,11 +66,11 @@ def split_data(original_list, split_rate):
     return split_datasets
 
 # copy datasets to this path
-def build_datasets(root_path, datasets_name, split_data_dict):
+def build_datasets(root_path, split_data_dict):
     original_images_root_path = root_path + os.path.sep + "Images" + os.path.sep
     for data_case, data_list in split_data_dict.items():
-        images_path = datasets_name + os.path.sep + data_case + os.path.sep + "images" + os.path.sep
-        labels_path = datasets_name + os.path.sep + data_case + os.path.sep + "labels" + os.path.sep
+        images_path = root_path + os.path.sep + "Links" + os.path.sep
+        labels_path = root_path + os.path.sep + "Labels" + os.path.sep
         os.makedirs(images_path, exist_ok=True)
         os.makedirs(labels_path, exist_ok=True)
         images_txt = images_path + data_case + '.txt'
@@ -79,7 +79,7 @@ def build_datasets(root_path, datasets_name, split_data_dict):
                 f.write('')
         for image_data in data_list:
             original_image_path = original_images_root_path + image_data['filename']
-            copy_image_path = images_path + image_data['filename']
+            # copy_image_path = images_path + image_data['filename']
             copy_label_path = labels_path + image_data['filename'].split('.')[0] + '.txt'
             # old function: copy image file
             # shutil.copyfile(original_image_path, copy_image_path)
@@ -95,6 +95,7 @@ def build_datasets(root_path, datasets_name, split_data_dict):
                         annotation['width'],
                         annotation['height']
                     ))
+        print('path [ %s ]: [ %s ]' % (data_case, images_txt))
     # end
 
 def memu():
@@ -102,7 +103,7 @@ def memu():
           "--h show help memu\n"
           "--source [dir] original images path\n"
           "--coco [file] Coco Annotation filename\n"
-          "--dataset [dataset] the name of dataset\n"
+          # "--dataset [dataset] the name of dataset\n"
           "--split [name rate] the name and rate of split data")
 
 if __name__ == '__main__':
@@ -132,7 +133,7 @@ if __name__ == '__main__':
 
     print('arguments information')
     print('    images root path:', root_path)
-    print('annotation file name:', ant_file_name)
+    # print('annotation file name:', ant_file_name)
     print('        dataset name:', dataset)
     print('          split info:', split_dict)
 
@@ -143,7 +144,8 @@ if __name__ == '__main__':
     # rate = [0.7, 0.2, 0.1] # train, valid, test
     datasets = split_data(original_list, [value for key, value in split_dict.items()])
     data_dict = {name: data for (name, value), data in zip(split_dict.items(), datasets)}
-    build_datasets(root_path, dataset, data_dict)
+    # build_datasets(root_path, dataset, data_dict)
+    build_datasets(root_path, data_dict)
 
     print('split data to success!')
     print('total of splitting data:',
